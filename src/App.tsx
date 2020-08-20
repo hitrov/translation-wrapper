@@ -1,161 +1,80 @@
-import React, { MouseEventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
-interface HelloProps {
+interface ContentProps {
   header: string;
   content: string;
-  TranslateButton?: React.ReactElement;
+  ReplaceButton?: React.ReactElement;
+  translatedProps?: {
+    header: string;
+    content: string;
+  }
 }
 
-// class Hello extends React.PureComponent<HelloProps> {
-// // class Hello extends React.Component<HelloProps> {
-//   componentDidUpdate(prevProps: Readonly<HelloProps>) {
-//     console.log('componentDidUpdate', this.constructor.name);
-//     console.log('prevProps', prevProps, 'this.props', this.props);
-//   }
-//
-//   render() {
-//     console.log('render Hello');
-//
-//     const { header, content, TranslateButton } = this.props;
-//
-//     return (
-//       <div>
-//         <h1>{header}</h1>
-//         <p>{content}</p>
-//         <div>
-//           {TranslateButton}
-//         </div>
-//       </div>
-//     );
-//   }
-// }
-
-function Hello(props: HelloProps) {
-  const { header, content, TranslateButton } = props;
-
-  console.log('render Hello', {
-    header,
-    content,
-  });
+function Content(props: ContentProps) {
+  const { header, content, ReplaceButton, translatedProps } = props;
 
   return (
-    <div>
-      <h1>{header}</h1>
-      <p>{content}</p>
-      <div>
-        {TranslateButton}
-      </div>
-    </div>
+    <>
+      <h1>{translatedProps && translatedProps.header || header}</h1>
+      <p>{translatedProps && translatedProps.content || content}</p>
+      {ReplaceButton}
+    </>
   );
 }
 
-interface WithLoadingProps {
-  loading: boolean;
-
-  getHeader(): string;
-  getContent(): string;
+interface WithReplacementProps {
+  translatableProps: {
+    getHeader(): string;
+    getContent(): string;
+  }
 }
 
-const withLoading = <P extends object>(Component: React.ComponentType<P>) =>
-  (props: P & WithLoadingProps) => {
+const withReplacement = <P extends object>(Component: React.ComponentType<P>) =>
+  (props: P & WithReplacementProps) => {
 
-    const { loading, getContent, getHeader, ...rest } = props;
+    const { translatableProps, ...rest } = props;
+    const { getHeader, getContent } = translatableProps;
     const [ header, setHeader ] = useState(getHeader());
     const [ content, setContent ] = useState(getContent());
-    const [ counter, setCounter ] = useState(0);
 
-    const onAddClick = () => {
-      setCounter(counter + 1);
-    }
-
-    const onClick = () => {
-      console.log('onClick');
-      // debugger;
-      setHeader('Теперь...');
-      setContent('...по-русски!');
-    };
-
-    const TranslateButton = (
-      <ActionButton
-        text={'Translate'}
-        onClick={onClick}
-      />
+    const ReplaceButton = (
+      <button onClick={() => {
+        setHeader('new header');
+        setContent('replacement goes here');
+      }}>
+        Replace
+      </button>
     );
 
-    console.log('render WithLoading', {
-      header,
-      content,
-    });
-
     return (
-      <>
-        <div>header: {header}</div>
-        <div>content: {content}</div>
-
-        {loading && <div>loading...</div>}
-        <Component
-          header={header}
-          content={content}
-          TranslateButton={TranslateButton}
-          {...rest as P}
-        />
-
-        <div>
-          {counter}
-          <button onClick={onAddClick}>Add</button>
-        </div>
-      </>
+      <Component
+        {...rest as P}
+        translatedProps={{
+          header,
+          content,
+        }}
+        ReplaceButton={ReplaceButton}
+      />
     );
   };
 
-const HelloLoading = withLoading(Hello);
+const ContentWithReplacement = withReplacement(Content);
 
 function App() {
-  const [ loading, setLoading ] = useState(true);
-  const [ content, setContent ] = useState( 'Hello...');
-  const [ header, setHeader ] = useState('...and welcome');
-
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setLoading(false);
-  //     setHeader('Now this is...');
-  //     setContent('...too late!');
-  //   }, 5000);
-  // });
-
-  console.log('render App', {
-    header,
-    content,
-  });
+  const header = 'hello';
+  const content = 'original content';
 
   return (
-    <div className="App">
-      <HelloLoading
-        header={header}
-        content={content}
-        getHeader={() => header}
-        getContent={() => content}
-        loading={loading}
-      />
-
-      {/*<Hello*/}
-      {/*  header={header}*/}
-      {/*  content={content}*/}
-      {/*/>*/}
-    </div>
+    <ContentWithReplacement
+      header={header}
+      content={content}
+      translatableProps={{
+        getContent: () => content,
+        getHeader: () => header,
+      }}
+    />
   );
 }
-
-interface ActionButtonProps {
-  text: string;
-  onClick: () => void;
-}
-
-const ActionButton = ({ onClick, text }: ActionButtonProps) => (
-  <button onClick={onClick}>
-    {text}
-  </button>
-);
 
 export default App;
