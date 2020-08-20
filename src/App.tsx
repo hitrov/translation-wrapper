@@ -4,23 +4,51 @@ import './App.css';
 interface HelloProps {
   header: string;
   content: string;
+  TranslateButton?: React.ReactElement;
 }
 
-const Hello = ({ header, content }: HelloProps) => (
-  <div>
-    <h1>{header}</h1>
-    <p>{content}</p>
-  </div>
-);
+class Hello extends React.PureComponent<HelloProps> {
+// class Hello extends React.Component<HelloProps> {
+  componentDidUpdate(prevProps: Readonly<HelloProps>) {
+    console.log('componentDidUpdate', this.constructor.name);
+    console.log('prevProps', prevProps, 'this.props', this.props);
+  }
 
-interface ActionButtonProps {
-  text: string;
-  onClick: () => void;
+  render() {
+    console.log('render Hello');
+
+    const { header, content, TranslateButton } = this.props;
+
+    return (
+      <div>
+        <h1>{header}</h1>
+        <p>{content}</p>
+        <div>
+          {TranslateButton}
+        </div>
+      </div>
+    );
+  }
 }
 
-const ActionButton = ({ onClick, text }: ActionButtonProps) => (
-  <button onClick={onClick}>{text}</button>
-);
+// function Hello(props: HelloProps) {
+//   const { header, content, TranslateButton } = props;
+//
+//   console.log('render Hello', {
+//     header,
+//     content,
+//   });
+//
+//   return (
+//     <div>
+//       <h1>{header}</h1>
+//       <p>{content}</p>
+//       <div>
+//         {TranslateButton}
+//       </div>
+//     </div>
+//   );
+// }
 
 interface WithLoadingProps {
   loading: boolean;
@@ -35,20 +63,21 @@ interface WithLoadingState {
   counter: number;
 }
 
-function withLoading<P extends object>(Component: React.ComponentType<P>) {
-  return class WithLoading extends React.Component<P & WithLoadingProps, WithLoadingState> {
+const withLoading = <P extends object>(Component: React.ComponentType<P>) =>
+  // class WithLoading extends React.PureComponent<P & WithLoadingProps, WithLoadingState> {
+  class WithLoading extends React.Component<P & WithLoadingProps, WithLoadingState> {
     state: Readonly<WithLoadingState> = {
       header: '',
       content: '',
       counter: 0,
     };
 
-    constructor(props: P & WithLoadingProps) {
-      super(props);
-
-      this.onClick = this.onClick.bind(this);
-      this.onAddClick = this.onAddClick.bind(this);
-    }
+    // constructor(props: P & WithLoadingProps) {
+    //   super(props);
+    //
+    //   // this.onClick = this.onClick.bind(this);
+    //   // this.onAddClick = this.onAddClick.bind(this);
+    // }
 
     componentDidMount() {
       const { getContent, getHeader } = this.props;
@@ -59,13 +88,19 @@ function withLoading<P extends object>(Component: React.ComponentType<P>) {
       });
     }
 
-    onAddClick() {
+    componentDidUpdate(prevProps: Readonly<P & WithLoadingProps>, prevState: Readonly<WithLoadingState>) {
+      console.log('componentDidUpdate', this.constructor.name);
+      console.log('prevProps', prevProps, 'this.props', this.props);
+      console.log('prevState', prevState, 'this.state', this.state);
+    }
+
+    onAddClick = () => {
       this.setState({
         counter: this.state.counter + 1,
       })
     }
 
-    onClick() {
+    onClick = () => {
       console.log('onClick');
       // debugger;
       this.setState({
@@ -76,56 +111,70 @@ function withLoading<P extends object>(Component: React.ComponentType<P>) {
 
     render() {
       const { loading, ...props } = this.props;
-      // const { loading, getContent, getHeader, ...props } = this.props;
-      // const [ content, setContent ] = useState(getContent());
-      // const [ header, setHeader ] = useState(getHeader());
-      //
-      // const onClick = () => {
-      //   setHeader('Теперь...');
-      //   setContent('...по-русски!');
-      // };
+
+      const TranslateButton = (
+        <ActionButton
+          text={'Translate'}
+          onClick={this.onClick}
+        />
+      );
+
+      const { counter, header, content } = this.state;
+
+      console.log('render WithLoading', {
+        header,
+        content,
+      });
 
       return (
         <>
+          <div>header: {header}</div>
+          <div>content: {content}</div>
+
           {loading && <div>loading...</div>}
           <Component
-            header={this.state.header}
-            content={this.state.content}
+            header={header}
+            content={content}
+            TranslateButton={TranslateButton}
             {...props as P}
           />
-          <ActionButton
-            text={'Translate'}
-            onClick={this.onClick}
-          />
+
           <div>
-            {this.state.counter}
+            {counter}
             <button onClick={this.onAddClick}>Add</button>
           </div>
         </>
       );
     }
-  }
-}
+  };
 
 const HelloLoading = withLoading(Hello);
 
 function App() {
   const [ loading, setLoading ] = useState(true);
+  const [ content, setContent ] = useState( 'Hello...');
+  const [ header, setHeader ] = useState('...and welcome');
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 2000);
+    setTimeout(() => {
+      setLoading(false);
+      setHeader('Now this is...');
+      setContent('...too late!');
+    }, 200000);
   });
 
-  const header = 'Hello!..';
-  const content = '...and welcome';
+  console.log('render App', {
+    header,
+    content,
+  });
 
   return (
     <div className="App">
       <HelloLoading
         header={header}
         content={content}
-        getContent={() => content}
         getHeader={() => header}
+        getContent={() => content}
         loading={loading}
       />
 
@@ -137,4 +186,24 @@ function App() {
   );
 }
 
+interface ActionButtonProps {
+  text: string;
+  onClick: () => void;
+}
+
+const ActionButton = ({ onClick, text }: ActionButtonProps) => (
+  <button onClick={onClick}>
+    {text}
+  </button>
+);
+
 export default App;
+
+// const { loading, getContent, getHeader, ...props } = this.props;
+// const [ content, setContent ] = useState(getContent());
+// const [ header, setHeader ] = useState(getHeader());
+//
+// const onClick = () => {
+//   setHeader('Теперь...');
+//   setContent('...по-русски!');
+// };
