@@ -1,24 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
+const Hello = ({ header, content }: { header: string, content: string }) => (
+  <div>
+    <h1>{header}</h1>
+    <p>{content}</p>
+  </div>
+);
+
+interface WithLoadingProps {
+  loading: boolean;
+}
+
+function withLoading<P extends object>(Component: React.ComponentType<P>) {
+  return class WithLoading extends React.Component<P & WithLoadingProps> {
+    render() {
+      const { loading, ...props } = this.props;
+
+      return (
+        <>
+          {loading && <div>loading...</div>}
+          <Component {...props as P} />
+        </>
+      );
+    }
+  }
+}
+
+const HelloLoading = withLoading(Hello);
+
 function App() {
+  const [ loading, setLoading ] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => setLoading(false), 5000);
+  });
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <HelloLoading header={'hello!'} content={'and welcome'} loading={loading} />
     </div>
   );
 }
