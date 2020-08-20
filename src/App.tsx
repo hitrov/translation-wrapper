@@ -10,17 +10,26 @@ const Hello = ({ header, content }: { header: string, content: string }) => (
 
 interface WithLoadingProps {
   loading: boolean;
+  getHeader(): string;
+  getContent(): string;
 }
 
 function withLoading<P extends object>(Component: React.ComponentType<P>) {
   return class WithLoading extends React.Component<P & WithLoadingProps> {
     render() {
-      const { loading, ...props } = this.props;
+      const { loading, getContent, getHeader, ...props } = this.props;
+
+      const content = getContent();
+      const header = getHeader();
 
       return (
         <>
           {loading && <div>loading...</div>}
-          <Component {...props as P} />
+          <Component
+            content={content}
+            header={header}
+            {...props as P}
+          />
         </>
       );
     }
@@ -36,9 +45,18 @@ function App() {
     setTimeout(() => setLoading(false), 5000);
   });
 
+  const header = 'hello!';
+  const content = 'and welcome';
+
   return (
     <div className="App">
-      <HelloLoading header={'hello!'} content={'and welcome'} loading={loading} />
+      <HelloLoading
+        header={header}
+        content={content}
+        getContent={() => content}
+        getHeader={() => header}
+        loading={loading}
+      />
     </div>
   );
 }
