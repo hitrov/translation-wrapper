@@ -33,7 +33,8 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
       },
     });
 
-    const [ language, setLanguage ] = useState('en')
+    // @ts-ignore
+    const language = props.language;
 
     const hasTranslation = !!state.translated[language];
 
@@ -83,7 +84,8 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
             //   language: e.target.value,
             // };
             // dispatch(setLanguageAction);
-            setLanguage(e.target.value);
+            // @ts-ignore
+            props.setLanguage(e.target.value);
           }}
         />
         {(showOriginal || !hasTranslation) && TranslateButton}

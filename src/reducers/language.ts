@@ -10,7 +10,7 @@ export const setLanguage = (language: string) => ({
   language,
 } as SetLanguage);
 
-const language = (state = 'en', action: SetLanguage): string => {
+const language = (state = 'de', action: SetLanguage): string => {
   switch (action.type) {
     case SET_LANGUAGE:
       return action.language;
