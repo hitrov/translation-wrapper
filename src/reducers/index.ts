@@ -1,6 +1,5 @@
 import {
   Action,
-  SET_LANGUAGE,
   TranslatableContent,
   TRANSLATION_FAILURE,
   TRANSLATION_REQUEST,
@@ -26,16 +25,12 @@ export const initialState: Omit<State, 'original'> = {
 
 export const reducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case SET_LANGUAGE:
-      return {
-        ...state,
-        language: action.language,
-      };
     case TRANSLATION_REQUEST:
       return {
         ...state,
         inProgress: true,
         error: '',
+        language: action.language,
       };
     case TRANSLATION_SUCCESS:
       return {

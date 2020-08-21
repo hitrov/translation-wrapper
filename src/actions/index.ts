@@ -3,7 +3,6 @@ import { State } from "../reducers";
 export const TRANSLATION_REQUEST = 'TRANSLATION_REQUEST';
 export const TRANSLATION_SUCCESS = 'TRANSLATION_SUCCESS';
 export const TRANSLATION_FAILURE = 'TRANSLATION_FAILURE';
-export const SET_LANGUAGE = 'SET_LANGUAGE';
 
 export interface TranslationRequest {
   type: typeof TRANSLATION_REQUEST;
@@ -13,6 +12,7 @@ export interface TranslationRequest {
 export interface TranslationSuccess {
   type: typeof TRANSLATION_SUCCESS;
   translated: TranslatableContent;
+  language: string;
 }
 
 export interface TranslationFailure {
@@ -22,6 +22,7 @@ export interface TranslationFailure {
 
 export const resolveTranslation = (
   state: State,
+  language: string,
   hasTranslation: boolean,
   setShowOriginal: (value: boolean) => void,
   dispatch: (action: Action) => void
@@ -31,8 +32,6 @@ export const resolveTranslation = (
     return;
   }
 
-  const { language } = state;
-
   const action: TranslationRequest = {
     type: TRANSLATION_REQUEST,
     language,
@@ -40,7 +39,7 @@ export const resolveTranslation = (
   dispatch(action);
 
   let resolveAction: TranslationSuccess | TranslationFailure;
-  if (Math.random() < 0.5) {
+  if (Math.random() <= .7) {
     resolveAction = {
       type: TRANSLATION_SUCCESS,
       translated: {
@@ -65,14 +64,9 @@ export const resolveTranslation = (
   }, 1000);
 };
 
-export interface SetLanguage {
-  type: typeof SET_LANGUAGE;
-  language: string;
-}
-
 export interface TranslatableContent {
   header: string;
   content: string;
 }
 
-export type Action = TranslationRequest | TranslationSuccess | TranslationFailure | SetLanguage;
+export type Action = TranslationRequest | TranslationSuccess | TranslationFailure;

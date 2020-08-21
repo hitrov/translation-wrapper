@@ -2,8 +2,6 @@ import React, { useReducer, useState } from "react";
 import { initialState, reducer } from "../reducers";
 import {
   resolveTranslation,
-  SET_LANGUAGE,
-  SetLanguage,
 } from "../actions";
 import { Select } from "../Select";
 
@@ -32,7 +30,8 @@ export const withReplacement = <P extends object>(Component: React.ComponentType
       },
     });
 
-    const { language } = state;
+    const [ language, setLanguage ] = useState('en')
+
     const hasTranslation = !!state.translated[language];
 
     const TranslateButton = (
@@ -40,6 +39,7 @@ export const withReplacement = <P extends object>(Component: React.ComponentType
         disabled={state.inProgress}
         onClick={() => resolveTranslation(
           state,
+          language,
           hasTranslation,
           setShowOriginal,
           dispatch
@@ -75,11 +75,12 @@ export const withReplacement = <P extends object>(Component: React.ComponentType
         <Select
           language={language}
           onChange={e => {
-            const setLanguageAction: SetLanguage = {
-              type: SET_LANGUAGE,
-              language: e.target.value,
-            };
-            dispatch(setLanguageAction);
+            // const setLanguageAction: SetLanguage = {
+            //   type: SET_LANGUAGE,
+            //   language: e.target.value,
+            // };
+            // dispatch(setLanguageAction);
+            setLanguage(e.target.value);
           }}
         />
         {(showOriginal || !hasTranslation) && TranslateButton}
