@@ -5,6 +5,11 @@ export interface SetLanguage {
   language: string;
 }
 
+export const setLanguage = (language: string) => ({
+  type: SET_LANGUAGE,
+  language,
+} as SetLanguage);
+
 const language = (state = 'en', action: SetLanguage): string => {
   switch (action.type) {
     case SET_LANGUAGE:

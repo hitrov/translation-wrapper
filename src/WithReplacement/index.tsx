@@ -4,6 +4,9 @@ import {
   resolveTranslation,
 } from "../actions";
 import { Select } from "../Select";
+import { connect } from 'react-redux';
+import { RootState } from "../reducers/redux";
+import { setLanguage } from '../reducers/language';
 
 interface WithReplacementProps {
   translatableProps: {
@@ -12,7 +15,7 @@ interface WithReplacementProps {
   }
 }
 
-export const withReplacement = <P extends object>(Component: React.ComponentType<P>) =>
+export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
   (props: P & WithReplacementProps) => {
 
     const { translatableProps, ...rest } = props;
@@ -88,3 +91,13 @@ export const withReplacement = <P extends object>(Component: React.ComponentType
       </>
     );
   };
+
+const connector = connect((state: RootState) => ({
+  language: state.language,
+}), {
+  setLanguage,
+});
+
+export function withReplacement<T>(Component: React.ComponentType<T>) {
+  return connector(wrapper<any>(Component));
+}
