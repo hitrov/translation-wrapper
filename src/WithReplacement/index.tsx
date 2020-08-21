@@ -89,7 +89,6 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
             //   language: e.target.value,
             // };
             // dispatch(setLanguageAction);
-            // @ts-ignore
             props.setLanguage(e.target.value);
           }}
         />
