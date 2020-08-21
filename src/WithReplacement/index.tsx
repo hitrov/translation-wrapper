@@ -4,15 +4,18 @@ import {
   resolveTranslation,
 } from "../actions";
 import { Select } from "../Select";
-import { connect } from 'react-redux';
+import { connect, ConnectedProps } from 'react-redux';
 import { RootState } from "../reducers/redux";
-import { setLanguage, SetLanguage } from '../reducers/language';
+import {
+  setLanguage,
+  // SetLanguage,
+} from '../reducers/language';
 
-interface IProps {
-  language: string;
-
-  setLanguage(language: string): SetLanguage;
-}
+// interface IProps {
+//   language: string;
+//
+//   setLanguage(language: string): SetLanguage;
+// }
 
 interface WithReplacementProps {
   translatableProps: {
@@ -22,7 +25,7 @@ interface WithReplacementProps {
 }
 
 export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
-  (props: P & WithReplacementProps & IProps) => {
+  (props: P & WithReplacementProps & PropsFromRedux) => {
 
     const { translatableProps, ...rest } = props;
     const { getHeader, getContent } = translatableProps;
@@ -98,18 +101,20 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
     );
   };
 
-type StateProps = Pick<IProps, | 'language'>;
-type DispatchProps = Pick<IProps, | 'setLanguage'>;
-type OwnProps = Omit<
-  IProps,
-  keyof StateProps | keyof DispatchProps
->;
+// type StateProps = Pick<IProps, | 'language'>;
+// type DispatchProps = Pick<IProps, | 'setLanguage'>;
+// type OwnProps = Omit<
+//   IProps,
+//   keyof StateProps | keyof DispatchProps
+// >;
 
-const connector = connect<StateProps, DispatchProps, OwnProps, RootState>((state: RootState) => ({
+const connector = connect((state: RootState) => ({
   language: state.language,
 }), {
   setLanguage,
 });
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
 
 export function withReplacement<T>(Component: React.ComponentType<T>) {
   return connector(wrapper<any>(Component));
