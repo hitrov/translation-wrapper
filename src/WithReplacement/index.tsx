@@ -13,14 +13,14 @@ interface InjectedProps {
   setLanguage(language: string): SetLanguage;
 }
 
-export interface WithReplacementProps {
-  translatableProps?: {
+interface WithReplacementProps {
+  translatableProps: {
     getHeader(): string;
     getContent(): string;
   }
 }
 
-export const withReplacement = <BaseProps extends WithReplacementProps>
+export const withReplacement = <BaseProps extends {}>
 (Component: React.ComponentType<BaseProps>) => {
 
   const mapStateToProps = (state: RootState) => ({
@@ -43,13 +43,9 @@ export const withReplacement = <BaseProps extends WithReplacementProps>
 
     const [ showOriginal, setShowOriginal ] = useState(true);
 
-    let header = '';
-    let content = '';
-    if (translatableProps) {
-      const { getHeader, getContent } = translatableProps;
-      header = getHeader();
-      content = getContent();
-    }
+    const { getHeader, getContent } = translatableProps;
+    let header = getHeader();
+    let content = getContent();
 
     const [ state, dispatch ] = useReducer(reducer, {
       ...initialState,

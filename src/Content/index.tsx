@@ -1,7 +1,6 @@
 import React from "react";
-import { WithReplacementProps } from "../WithReplacement";
 
-interface ContentProps extends WithReplacementProps {
+interface ContentProps {
   header: string;
   content: string;
   translatedProps?: {
