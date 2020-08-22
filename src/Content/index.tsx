@@ -1,6 +1,7 @@
 import React from "react";
+import { WithReplacementProps } from "../WithReplacement";
 
-interface ContentProps {
+interface ContentProps extends WithReplacementProps {
   header: string;
   content: string;
   translatedProps?: {
@@ -10,12 +11,12 @@ interface ContentProps {
 }
 
 export function Content(props: ContentProps) {
-  const { translatedProps } = props;
+  const { translatedProps, header, content } = props;
 
   return (
     <>
-      <h1>{translatedProps && translatedProps.header}</h1>
-      <p>{translatedProps && translatedProps.content}</p>
+      <h1>{translatedProps && translatedProps.header || header}</h1>
+      <p>{translatedProps && translatedProps.content || content}</p>
     </>
   );
 }

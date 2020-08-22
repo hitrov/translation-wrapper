@@ -1,38 +1,55 @@
 import React, { useReducer, useState } from "react";
 import { initialState, reducer } from "../reducers";
-import {
-  resolveTranslation,
-} from "../actions";
+import { resolveTranslation, } from "../actions";
 import { Select } from "../Select";
-import { connect, ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
 import { RootState } from "../reducers/redux";
-import {
-  setLanguage,
-  // SetLanguage,
-} from '../reducers/language';
+import { setLanguage, SetLanguage, } from '../reducers/language';
+import { Diff } from 'utility-types';
 
-// interface IProps {
-//   language: string;
-//
-//   setLanguage(language: string): SetLanguage;
-// }
+interface InjectedProps {
+  language: string;
 
-interface WithReplacementProps {
-  translatableProps: {
+  setLanguage(language: string): SetLanguage;
+}
+
+export interface WithReplacementProps {
+  translatableProps?: {
     getHeader(): string;
     getContent(): string;
   }
 }
 
-export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
-  (props: P & WithReplacementProps & PropsFromRedux) => {
+export const withReplacement = <BaseProps extends WithReplacementProps>
+(Component: React.ComponentType<BaseProps>) => {
 
-    const { translatableProps, ...rest } = props;
-    const { getHeader, getContent } = translatableProps;
+  const mapStateToProps = (state: RootState) => ({
+    language: state.language,
+  });
+
+  const dispatchProps = {
+    setLanguage: (language: string) => setLanguage(language),
+  };
+
+  type PropsFromRedux = ReturnType<typeof mapStateToProps> &
+    typeof dispatchProps & {
+    // here you can extend ConnectedHoc with new props
+    // overrideCount?: number;
+  };
+
+  const Hoc = (props: PropsFromRedux & WithReplacementProps) => {
+
+    const { translatableProps, language, setLanguage, ...rest } = props;
+
     const [ showOriginal, setShowOriginal ] = useState(true);
 
-    let header = getHeader();
-    let content = getContent();
+    let header = '';
+    let content = '';
+    if (translatableProps) {
+      const { getHeader, getContent } = translatableProps;
+      header = getHeader();
+      content = getContent();
+    }
 
     const [ state, dispatch ] = useReducer(reducer, {
       ...initialState,
@@ -41,8 +58,6 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
         content,
       },
     });
-
-    const language = props.language;
 
     const hasTranslation = !!state.translated[language];
 
@@ -77,7 +92,7 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
     return (
       <>
         <Component
-          {...rest as P}
+          {...rest as BaseProps}
           translatedProps={{
             header,
             content,
@@ -87,12 +102,7 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
         <Select
           language={language}
           onChange={e => {
-            // const setLanguageAction: SetLanguage = {
-            //   type: SET_LANGUAGE,
-            //   language: e.target.value,
-            // };
-            // dispatch(setLanguageAction);
-            props.setLanguage(e.target.value);
+            setLanguage(e.target.value);
           }}
         />
         {(showOriginal || !hasTranslation) && TranslateButton}
@@ -101,21 +111,11 @@ export const wrapper = <P extends object>(Component: React.ComponentType<P>) =>
     );
   };
 
-// type StateProps = Pick<IProps, | 'language'>;
-// type DispatchProps = Pick<IProps, | 'setLanguage'>;
-// type OwnProps = Omit<
-//   IProps,
-//   keyof StateProps | keyof DispatchProps
-// >;
-
-const connector = connect((state: RootState) => ({
-  language: state.language,
-}), {
-  setLanguage,
-});
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export function withReplacement<T>(Component: React.ComponentType<T>) {
-  return connector(wrapper<any>(Component));
-}
+  return connect<ReturnType<typeof mapStateToProps>,
+    typeof dispatchProps, // use "undefined" if NOT using dispatchProps
+    Diff<BaseProps, InjectedProps>,
+    RootState>(
+    mapStateToProps,
+    dispatchProps
+  )(Hoc);
+};
